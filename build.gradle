@@ -1,0 +1,86 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+group = "io.github.vaneproject"
+archivesBaseName = "badwordfiltering"
+version = "1.0.0"
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name = 'bad-word-filtering'
+                packaging = 'jar'
+                description = 'bad word filtering java code'
+                url = 'https://github.com/VaneProject/bad-word-filtering'
+
+                scm {
+                    connection = 'scm:git:github.com/VaneProject/bad-word-filtering.git'
+                    developerConnection = 'scm:git:ssh://github.com:VaneProject/bad-word-filtering.git'
+                    url = 'https://github.com/VaneProject/bad-word-filtering/tree/master'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/VaneProject/bad-word-filtering/blob/master/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = 'PersesTitan'
+                        email = 'ToramPersesTitan@gmail.com'
+                        organization = "VaneProject"
+                        organizationUrl = 'https://github.com/VaneProject'
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.0.0'
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
